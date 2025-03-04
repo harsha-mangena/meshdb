@@ -299,3 +299,4 @@ SPECTACULAR_SETTINGS = {
         "docExpansion": "none",
     },
 }
+SESSION_COOKIE_SECURE = True
