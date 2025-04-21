@@ -14,7 +14,7 @@ def deliver_webhook_task(self: Task, hook_id: int, payload: Dict[str, Any]) -> N
     """Deliver the payload to the hook target"""
     hook = CelerySerializerHook.objects.get(id=hook_id)
     try:
-        response = requests.post(url=hook.target, data=payload, headers=hook.headers)
+        response = requests.post(url=hook.target, data=payload, headers=hook.headers, timeout=60)
         if response.status_code >= 400:
             response.raise_for_status()
     except (requests.ConnectionError, requests.HTTPError) as exc:
