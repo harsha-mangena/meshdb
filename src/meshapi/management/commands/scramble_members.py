@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 from datetime import date, timedelta
-from random import randint, randrange
 from typing import Any, Optional, Tuple
 
 from django.core.management.base import BaseCommand
@@ -12,6 +11,7 @@ from meshapi.models.building import Building
 from meshapi.models.devices.device import Device
 from meshapi.models.link import Link
 from meshapi.models.node import Node
+import secrets
 
 
 # Uses faker to get fake names, emails, and phone numbers
@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 member.stripe_email_address = ""
                 member.additional_email_addresses = []
                 member.phone_number = fake.phone_number()
-                member.additional_phone_numbers = [] if randint(0, 100) > 0 else [fake.phone_number()]
+                member.additional_phone_numbers = [] if secrets.SystemRandom().randint(0, 100) > 0 else [fake.phone_number()]
                 member.slack_handle = ""
                 member.notes = fake.text()
                 member.save()
@@ -54,7 +54,7 @@ class Command(BaseCommand):
             print("Scrambling installs...")
             installs = Install.objects.all()
             for install in installs:
-                install.unit = randrange(100)
+                install.unit = secrets.SystemRandom().randrange(100)
                 install.notes = fake.text()
                 install.request_date, install.install_date, install.abandon_date = self.fuzz_dates(
                     install.request_date, install.install_date, install.abandon_date
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 address = building.street_address.split(" ")
                 if len(address) > 0:
                     try:
-                        fuzzed_street_number = str(int(address[0]) + randint(1, 20))
+                        fuzzed_street_number = str(int(address[0]) + secrets.SystemRandom().randint(1, 20))
                         street_name = " ".join(address[1:])
                         building.street_address = f"{fuzzed_street_number} {street_name}"
                     except ValueError:
@@ -118,12 +118,12 @@ class Command(BaseCommand):
         if request_date:
             # Make it happen sooner so that there's no way the request date is
             # now beyond the install/abandon date.
-            request_date -= timedelta(days=randint(14, 100))
+            request_date -= timedelta(days=secrets.SystemRandom().randint(14, 100))
 
         if install_date:
-            install_date += timedelta(days=randint(14, 100))
+            install_date += timedelta(days=secrets.SystemRandom().randint(14, 100))
 
         if abandon_date:
-            abandon_date += timedelta(days=randint(100, 200))
+            abandon_date += timedelta(days=secrets.SystemRandom().randint(100, 200))
 
         return request_date, install_date, abandon_date
