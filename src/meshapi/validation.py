@@ -3,13 +3,13 @@ import logging
 from dataclasses import dataclass
 
 import phonenumbers
-import requests
 from validate_email import validate_email
 
 from meshapi.exceptions import AddressAPIError, AddressError, OpenDataAPIError
 from meshapi.util.constants import DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS, INVALID_ALTITUDE
 from meshdb.utils.spreadsheet_import.building.constants import INVALID_BIN_NUMBERS
 from meshdb.utils.spreadsheet_import.building.pelias import humanify_street_address
+from security import safe_requests
 
 
 def validate_email_address(email_address: str) -> bool:
@@ -62,7 +62,7 @@ class NYCAddressInfo:
                 "text": self.address,
                 "size": "1",
             }
-            nyc_planning_req = requests.get(
+            nyc_planning_req = safe_requests.get(
                 "https://geosearch.planninglabs.nyc/v2/search",
                 params=query_params,
                 timeout=DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS,
@@ -114,7 +114,7 @@ class NYCAddressInfo:
                 "$select": "heightroof,groundelev",
                 "$limit": "1",
             }
-            nyc_dataset_req = requests.get(
+            nyc_dataset_req = safe_requests.get(
                 "https://data.cityofnewyork.us/resource/qb5r-6dgf.json",
                 params=query_params,
                 timeout=DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS,

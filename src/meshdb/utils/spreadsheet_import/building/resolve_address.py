@@ -25,13 +25,14 @@ from meshdb.utils.spreadsheet_import.building.pelias import (
     pelias_to_database_address_components,
 )
 from meshdb.utils.spreadsheet_import.csv_load import DroppedModification, SpreadsheetRow
+from security import safe_requests
 
 PELIAS_SCORE_WARNING_THRESHOLD = 0.5
 
 
 def get_geolocator() -> Nominatim:
     try:
-        requests.get(f"http://{LOCAL_MESH_NOMINATIM_ADDR}", timeout=1)
+        safe_requests.get(f"http://{LOCAL_MESH_NOMINATIM_ADDR}", timeout=1)
         return Nominatim(domain=LOCAL_MESH_NOMINATIM_ADDR, scheme="http", timeout=DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS)
     except requests.exceptions.RequestException:
         logging.warning("Using public OSM endpoint. Is the local OSM endpoint running?")
@@ -236,7 +237,7 @@ class AddressParser:
 
         # Empirically, the /autocomplete endpoint performs better than the /search endpoint
         # (don't ask me why)
-        nyc_planning_req = requests.get(
+        nyc_planning_req = safe_requests.get(
             "https://geosearch.planninglabs.nyc/v2/autocomplete",
             params=query_params,
             timeout=DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS,

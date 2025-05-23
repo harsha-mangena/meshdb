@@ -2,8 +2,6 @@ import logging
 import os
 from pathlib import Path
 from typing import Union
-
-import requests
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.request import Request
@@ -15,6 +13,7 @@ from meshapi.models.node import Node
 from meshapi.permissions import HasPanoramaUpdatePermission
 from meshapi.util.constants import DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS
 from meshapi.util.django_pglocks import advisory_lock
+from security import safe_requests
 
 # Config for gathering/generating panorama links
 PANO_REPO_OWNER = "nycmeshnet"
@@ -184,7 +183,7 @@ def parse_pano_title(title: str) -> tuple[str, str]:
 # 100k/7MB of data)
 def get_head_tree_sha(owner: str, repo: str, branch: str, token: str = "") -> str | None:
     url = f"https://api.github.com/repos/{owner}/{repo}/branches/{branch}"
-    master = requests.get(
+    master = safe_requests.get(
         url, headers={"Authorization": f"Bearer {token}"}, timeout=DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS
     )
     if master.status_code != 200:
@@ -199,7 +198,7 @@ def list_files_in_git_directory(
     owner: str, repo: str, directory: str, tree: str, token: str = ""
 ) -> Union[list[str], None]:
     url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/{tree}?recursive=1"
-    response = requests.get(
+    response = safe_requests.get(
         url, headers={"Authorization": f"Bearer {token}"}, timeout=DEFAULT_EXTERNAL_API_TIMEOUT_SECONDS
     )
     if response.status_code != 200:
