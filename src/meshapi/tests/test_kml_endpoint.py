@@ -4,6 +4,7 @@ from django.test import Client, TestCase
 from lxml import etree
 
 from meshapi.models import Building, Device, Install, Link, Member, Node
+import lxml.etree
 
 
 def create_building_install_node_and_device(member_ref, nn):
@@ -147,7 +148,7 @@ class TestKMLEndpoint(TestCase):
         self.maxDiff = None
         response = self.c.get("/api/v1/geography/whole-mesh.kml")
 
-        kml_tree = etree.fromstring(response.content.decode("UTF8"))
+        kml_tree = etree.fromstring(response.content.decode("UTF8"), parser=lxml.etree.XMLParser(resolve_entities=False))
 
         # TODO: Actually assert real things here in a less brittle way,
         #  once fastkml is actually capable of parsing its own outputs
